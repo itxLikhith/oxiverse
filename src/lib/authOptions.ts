@@ -16,25 +16,37 @@ export const authOptions: NextAuthOptions = {
           throw new Error('Email and password are required')
         }
 
+        const { email, password } = credentials
+        const adminEmail = process.env.ADMIN_EMAIL
+        const adminPassword = process.env.ADMIN_PASSWORD
+
+        // 1. Try environment variable login as priority
+        if (adminEmail && adminPassword && 
+            email.toLowerCase() === adminEmail.toLowerCase() && 
+            password === adminPassword) {
+            
+          const user = await prisma.user.findUnique({
+            where: { email: adminEmail.toLowerCase() },
+          })
+          
+          if (user) {
+            return { id: user.id, email: user.email, name: user.name }
+          }
+          
+          // Fallback if not seeded yet
+          return { id: 'admin-fallback', email: adminEmail, name: 'Admin' }
+        }
+
+        // 2. Normal database-based login for other users or if env logout
         const user = await prisma.user.findUnique({
-          where: { email: credentials.email },
+          where: { email: email.toLowerCase() },
         })
 
         if (!user) {
           throw new Error('Invalid email or password')
         }
 
-        // Check if it's the admin from env
-        const isAdminEnv = 
-          process.env.ADMIN_EMAIL && 
-          credentials.email === process.env.ADMIN_EMAIL && 
-          process.env.ADMIN_PASSWORD &&
-          credentials.password === process.env.ADMIN_PASSWORD
-
-        const isPasswordValid = isAdminEnv || await bcrypt.compare(
-          credentials.password,
-          user.password
-        )
+        const isPasswordValid = await bcrypt.compare(password, user.password)
 
         if (!isPasswordValid) {
           throw new Error('Invalid email or password')
