@@ -125,22 +125,24 @@ a {
     radial-gradient(at 0% 100%, hsla(271, 91%, 65%, 0.1) 0px, transparent 50%);
 }
 
-/* Animated Border Beam */
-.border-beam {
-  position: relative;
-  overflow: hidden;
-}
+/* Animated Border Beam - Only enabled on Large Screens for Performance */
+@media (min-width: 1024px) {
+  .border-beam {
+    position: relative;
+    overflow: hidden;
+  }
 
-.border-beam::before {
-  content: "";
-  position: absolute;
-  inset: -1px;
-  background: conic-gradient(from 120deg at 50% 50%, transparent 0, #3b82f6 25%, transparent 50%);
-  border-radius: inherit;
-  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-  mask-composite: xor;
-  pointer-events: none;
-  animation: beam 4s linear infinite;
+  .border-beam::before {
+    content: "";
+    position: absolute;
+    inset: -1px;
+    background: conic-gradient(from 120deg at 50% 50%, transparent 0, #3b82f6 25%, transparent 50%);
+    border-radius: inherit;
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask-composite: xor;
+    pointer-events: none;
+    animation: beam 4s linear infinite;
+  }
 }
 
 @keyframes beam {

@@ -6,7 +6,6 @@ import SectionHeader from '@/components/ui/SectionHeader'
 import Card from '@/components/ui/Card'
 import Image from 'next/image'
 import { motion } from 'framer-motion'
-import { useIsMobile } from '@/lib/hooks/useIsMobile'
 
 const container = {
   hidden: { opacity: 0 },
@@ -94,8 +93,6 @@ const item = {
 }
 
 export default function Features() {
-  const isMobile = useIsMobile(1024)
-
   return (
     <Section id="products" dark>
       <SectionHeader
@@ -135,7 +132,7 @@ export default function Features() {
       >
         {features.map((feature) => (
           <motion.div key={feature.name} variants={item}>
-            <Card className={`h-full group ${!isMobile ? 'border-beam' : ''}`}>
+            <Card className="h-full group border-beam">
               <div className={`inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br ${feature.color} mb-8 shadow-xl shadow-black/30 group-hover:scale-110 group-hover:rotate-6 transition-all duration-500`}>
                 <div className="text-white drop-shadow-lg scale-110">
                   {feature.icon}
