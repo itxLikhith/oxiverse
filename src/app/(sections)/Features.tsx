@@ -5,7 +5,7 @@ import Section from '@/components/ui/Section'
 import SectionHeader from '@/components/ui/SectionHeader'
 import Card from '@/components/ui/Card'
 import Image from 'next/image'
-import { motion } from 'framer-motion'
+import { motion, useReducedMotion } from 'framer-motion'
 
 const container = {
   hidden: { opacity: 0 },
@@ -15,6 +15,11 @@ const container = {
       staggerChildren: 0.1
     }
   }
+}
+
+const item = {
+  hidden: { opacity: 0, y: 20 },
+  show: { opacity: 1, y: 0, z: 0, transition: { type: "spring" as const, stiffness: 100, damping: 20 } }
 }
 
 interface Feature {
@@ -87,12 +92,11 @@ const features: Feature[] = [
   },
 ]
 
-const item = {
-  hidden: { opacity: 0, y: 20 },
-  show: { opacity: 1, y: 0, transition: { type: "spring" as const, stiffness: 100 } }
-}
+
 
 export default function Features() {
+  const prefersReducedMotion = useReducedMotion()
+
   return (
     <Section id="products" dark>
       <SectionHeader
@@ -102,10 +106,11 @@ export default function Features() {
       />
       
       <motion.div 
-        initial={{ opacity: 0, scale: 0.95, y: 30 }}
-        whileInView={{ opacity: 1, scale: 1, y: 0 }}
+        style={{ willChange: 'transform, opacity' }}
+        initial={{ opacity: 0, scale: prefersReducedMotion ? 1 : 0.95, y: prefersReducedMotion ? 0 : 30 }}
+        whileInView={{ opacity: 1, scale: 1, y: 0, z: 0 }}
         viewport={{ once: true, margin: "-100px" }}
-        transition={{ duration: 1, type: "spring", bounce: 0.3 }}
+        transition={{ duration: 0.5, type: "spring", bounce: 0.3 }}
         className="relative w-full aspect-[21/9] rounded-3xl overflow-hidden mb-24 border border-white/10 shadow-2xl shadow-primary-500/10 group"
       >
         <Image
@@ -131,7 +136,11 @@ export default function Features() {
         className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10"
       >
         {features.map((feature) => (
-          <motion.div key={feature.name} variants={item}>
+          <motion.div 
+            key={feature.name} 
+            variants={item}
+            style={{ willChange: 'transform, opacity' }}
+          >
             <Card className="h-full group border-beam">
               <div className={`inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br ${feature.color} mb-8 shadow-xl shadow-black/30 group-hover:scale-110 group-hover:rotate-6 transition-all duration-500`}>
                 <div className="text-white drop-shadow-lg scale-110">
