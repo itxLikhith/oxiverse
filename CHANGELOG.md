@@ -4,6 +4,9 @@ All notable changes to the Oxiverse project will be documented in this file.
 
 ## [Unreleased]
 ### Added
+- Added comprehensive SEO optimization including `sitemap.ts`, `robots.ts`, and structured data (JSON-LD) in the root layout.
+- Implemented `<noscript>` fallback content semantic markup to ensure high visibility for search engine crawlers regardless of 3D scene load states.
+- Enhanced Next.js `metadata` object dynamically supporting OpenGraph and Twitter cards properties across the application.
 - Added immersive 3D `OxiverseCore` component using Three.js and React Three Fiber to the Hero section.
 - Added animated Framer Motion path connectors to the Roadmap section.
 

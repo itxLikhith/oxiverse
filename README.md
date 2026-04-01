@@ -276,7 +276,7 @@ All UI components are in `src/components/ui/`:
 ## 📈 Next Steps (Week 4)
 
 1. **Storage Setup** - Configure Supabase Storage or Cloudflare R2 for PDF uploads
-2. **SEO Polish** - Add sitemap, robots.txt, OpenGraph images
+2. **SEO Polish** - ✅ Added sitemap, robots.txt, OpenGraph tags, structured data, and `<noscript>` semantic fallbacks for crawlers.
 3. **Analytics** - Add Vercel Analytics or Google Analytics
 4. **Performance** - Optimize images, add caching headers
 5. **Testing** - Add E2E tests with Playwright
