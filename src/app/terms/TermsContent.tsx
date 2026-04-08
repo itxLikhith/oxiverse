@@ -45,7 +45,7 @@ export default function TermsContent() {
             <p>
               Oxiverse is <strong>Source Available</strong>, and fully
               <strong>Self-Hostable</strong>. We prioritize the decentralization of information tools.
-              Our infrastructure is designed for high-degree anonymity for users in its current state.
+              Our infrastructure is designed to protect user anonymity through zero-logging and zero-persistence — not through network-layer anonymity tools.
             </p>
           </section>
 
@@ -54,7 +54,7 @@ export default function TermsContent() {
             <p>
               As a discovery engine, Oxiverse may surface content of all types, including illegal materials
               available on the open web. We strictly expect our users to utilize this platform for
-              <strong>Educational and Research Purposes</strong> only.
+              <strong>Educational and Research Purposes</strong> and other lawful purposes.
             </p>
             <ul>
               <li>We do not promote, endorse, or host illegal content.</li>
