@@ -61,10 +61,6 @@ export const metadata: Metadata = {
       { url: '/apple-touch-icon.png', sizes: '180x180', type: 'image/png' },
     ],
   },
-  verification: {
-    google: 'google-site-verification-placeholder',
-    yandex: 'yandex-verification-placeholder',
-  },
   alternates: {
     canonical: 'https://oxiverse.com',
     languages: {

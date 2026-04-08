@@ -79,10 +79,10 @@ export default function Navigation() {
                   }`}
                   onClick={(e) => {
                     if (item.href.startsWith('/#')) {
-                      e.preventDefault()
                       const id = item.href.replace('/#', '')
                       const el = document.getElementById(id)
                       if (el) {
+                        e.preventDefault()
                         if (lenis) {
                           lenis.scrollTo(el, { offset: -120 })
                         } else {
@@ -130,10 +130,10 @@ export default function Navigation() {
                     onClick={(e) => {
                       setIsMobileMenuOpen(false)
                       if (item.href.startsWith('/#')) {
-                        e.preventDefault()
                         const id = item.href.replace('/#', '')
                         const el = document.getElementById(id)
                         if (el) {
+                          e.preventDefault()
                           if (lenis) {
                             lenis.scrollTo(el, { offset: -120 })
                           } else {

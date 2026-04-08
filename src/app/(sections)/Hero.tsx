@@ -23,7 +23,7 @@ export default function Hero() {
           initial={{ opacity: 0, scale: 0.98 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.4, ease: "easeOut" }}
-          className="retro-box w-full max-w-[1200px] mx-auto pointer-events-auto flex flex-col"
+          className="retro-box w-full max-w-[1260px] mx-auto pointer-events-auto flex flex-col"
         >
           {/* Authentic Retro Header Bar */}
           <div className="retro-header-bar w-full">
@@ -43,7 +43,7 @@ export default function Hero() {
           <div className="p-8 md:p-12 lg:p-16 flex flex-col xl:flex-row gap-12 xl:gap-16 2xl:gap-24 relative bg-primary-800">
             
             {/* Left Col: Stark Typography */}
-            <div className="flex-1 flex flex-col justify-center">
+            <div className="flex-1 min-w-0 flex flex-col justify-center">
               
               <div className="inline-block border-2 border-primary-50 px-3 py-1 mb-8 self-start bg-primary-950">
                 <span className="font-mono text-xs uppercase tracking-widest font-bold text-accent-300">
@@ -51,7 +51,7 @@ export default function Hero() {
                 </span>
               </div>
 
-              <h1 className="font-display text-[3.5rem] sm:text-[5rem] md:text-[6rem] xl:text-[6rem] 2xl:text-[7.5rem] font-bold uppercase leading-[0.85] tracking-tighter mb-12 text-shimmer">
+              <h1 className="font-display text-[2.5rem] sm:text-[4rem] md:text-[5.5rem] lg:text-[6rem] xl:text-[4rem] 2xl:text-[4.5rem] font-bold uppercase leading-[0.85] tracking-tighter mb-12 text-shimmer">
                 <span className="block">Privacy</span>
                 <span className="block text-accent-300 drop-shadow-[2px_2px_0_rgba(0,0,0,1)]">
                   Infra<span className="text-primary-50">structure_</span>
@@ -81,7 +81,7 @@ export default function Hero() {
             </div>
 
             {/* Right Col: CRT Diagnostics Display */}
-            <div className="w-full xl:w-[380px] flex flex-col justify-center">
+            <div className="w-full xl:w-[350px] flex-shrink-0 flex flex-col justify-center">
               
               <div className="retro-box-seafoam overflow-hidden relative">
                 
@@ -105,19 +105,19 @@ export default function Hero() {
 
                     <div className="flex justify-between items-center border-b-2 border-primary-800/50 pb-2">
                       <span className="text-primary-400">SYS_CORE</span>
-                      <span className="text-accent-300 font-black">STABLE</span>
+                      <span className="text-accent-300 font-black whitespace-nowrap">STABLE</span>
                     </div>
                     <div className="flex justify-between items-center border-b-2 border-primary-800/50 pb-2">
                       <span className="text-primary-400">NET_LATENCY</span>
-                      <span className="text-primary-50">12ms</span>
+                      <span className="text-primary-50 font-black whitespace-nowrap">12ms</span>
                     </div>
                     <div className="flex justify-between items-center border-b-2 border-primary-800/50 pb-2">
                       <span className="text-primary-400">DATA_CIPHER</span>
-                      <span className="text-primary-50">AES-256</span>
+                      <span className="text-primary-50 font-black whitespace-nowrap">AES-256</span>
                     </div>
                     <div className="flex justify-between items-center border-b-2 border-primary-800/50 pb-2">
                       <span className="text-primary-400">ACTIVE_NODES</span>
-                      <span className="text-primary-50">2,408</span>
+                      <span className="text-primary-50 font-black whitespace-nowrap">2,408</span>
                     </div>
                     
                     {/* Blinking Prompt */}

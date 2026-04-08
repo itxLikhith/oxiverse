@@ -18,7 +18,7 @@ export const InteractiveParticles = ({ scrollProgress }: InteractiveParticlesPro
 
   // Create particle system
   const { positions, velocities, colors } = useMemo(() => {
-    const count = 2000
+    const count = 1000
     const positions = new Float32Array(count * 3)
     const velocities = new Float32Array(count * 3)
     const colors = new Float32Array(count * 3)

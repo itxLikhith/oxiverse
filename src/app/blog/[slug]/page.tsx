@@ -3,16 +3,25 @@ import { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
-import { formatDate } from '@/lib/utils'
+import { formatDate, calculateReadingTime } from '@/lib/utils'
 import Navigation from '@/components/Navigation'
 import Footer from '@/components/Footer'
 import Image from 'next/image'
 import * as motion from 'framer-motion/client'
+import Link from 'next/link'
 
-export const dynamic = 'force-dynamic'
+export const revalidate = 60
 
 interface BlogPostPageProps {
   params: { slug: string }
+}
+
+export async function generateStaticParams() {
+  const posts = await prisma.blog.findMany({
+    where: { published: true },
+    select: { slug: true },
+  })
+  return posts.map((post) => ({ slug: post.slug }))
 }
 
 export async function generateMetadata({ params }: BlogPostPageProps): Promise<Metadata> {
@@ -49,14 +58,16 @@ const MarkdownComponents = {
     }
 
     return (
-      <span className="block my-12 rounded-2xl overflow-hidden border border-white/10 shadow-2xl">
-        <img
-          {...props}
-          className="w-full h-auto object-cover max-h-[600px]"
-          loading="lazy"
+      <span className="block my-12 rounded-2xl overflow-hidden border border-white/10 shadow-2xl relative w-full aspect-video">
+        <Image
+          src={props.src}
+          alt={props.alt || ''}
+          fill
+          className="object-cover"
+          sizes="(max-width: 1200px) 100vw, 1200px"
         />
         {props.alt && (
-          <span className="block text-center text-sm text-dark-500 mt-4 italic">
+          <span className="sr-only">
             {props.alt}
           </span>
         )}
@@ -79,43 +90,89 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
     notFound()
   }
 
+  // Fetch related posts
+  const relatedPosts = await prisma.blog.findMany({
+    where: { 
+      published: true,
+      NOT: { slug: params.slug }
+    },
+    take: 2,
+    orderBy: { createdAt: 'desc' }
+  })
+
+  const readingTime = calculateReadingTime(blog.content)
+  const wordCount = blog.content.split(/\s/g).length
+
+  const breadcrumbLd = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      {
+        '@type': 'ListItem',
+        position: 1,
+        name: 'Home',
+        item: 'https://oxiverse.com'
+      },
+      {
+        '@type': 'ListItem',
+        position: 2,
+        name: 'Blog',
+        item: 'https://oxiverse.com/blog'
+      },
+      {
+        '@type': 'ListItem',
+        position: 3,
+        name: blog.title,
+        item: `https://oxiverse.com/blog/${params.slug}`
+      }
+    ]
+  }
+
+  const articleLd = {
+    '@context': 'https://schema.org',
+    '@type': 'BlogPosting',
+    headline: blog.title,
+    description: blog.excerpt,
+    image: blog.imageUrl,
+    datePublished: blog.publishedAt || blog.createdAt,
+    dateModified: blog.updatedAt || blog.publishedAt || blog.createdAt,
+    wordCount: wordCount,
+    timeRequired: `PT${Math.ceil(wordCount / 200)}M`,
+    author: {
+      '@type': 'Person',
+      name: (blog.author as any).name || (blog.author as any).email,
+      url: `https://oxiverse.com/authors/${(blog.author as any).name?.toLowerCase().replace(/\s+/g, '-') || 'admin'}`
+    },
+    publisher: {
+      '@type': 'Organization',
+      name: 'Oxiverse',
+      logo: {
+        '@type': 'ImageObject',
+        url: 'https://oxiverse.com/favicon-256x256.png'
+      },
+      url: 'https://oxiverse.com'
+    },
+    mainEntityOfPage: {
+      '@type': 'WebPage',
+      '@id': `https://oxiverse.com/blog/${params.slug}`
+    },
+    keywords: 'privacy, search engine, decentralized, infrastructure, oxiverse'
+  }
+
   return (
     <main className="min-h-screen bg-dark-950 pt-20">
       <Navigation />
       <article className="max-w-4xl mx-auto px-4 py-12">
-        {/* Header */}
+        {/* Schema Markup */}
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
-              '@context': 'https://schema.org',
-              '@type': 'BlogPosting',
-              headline: blog.title,
-              description: blog.excerpt,
-              image: blog.imageUrl,
-              datePublished: blog.publishedAt || blog.createdAt,
-              dateModified: blog.updatedAt || blog.publishedAt || blog.createdAt,
-              author: {
-                '@type': 'Person',
-                name: (blog.author as any).name || (blog.author as any).email,
-                url: `https://oxiverse.com/authors/${(blog.author as any).name?.toLowerCase().replace(/\s+/g, '-') || 'admin'}`
-              },
-              publisher: {
-                '@type': 'Organization',
-                name: 'Oxiverse',
-                logo: {
-                  '@type': 'ImageObject',
-                  url: 'https://oxiverse.com/favicon-256x256.png'
-                }
-              },
-              mainEntityOfPage: {
-                '@type': 'WebPage',
-                '@id': `https://oxiverse.com/blog/${params.slug}`
-              },
-              keywords: 'privacy, search engine, decentralized, infrastructure, oxiverse'
-            }),
-          }}
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }}
         />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(articleLd) }}
+        />
+
         <motion.header 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -123,11 +180,13 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
           className="border-b border-dark-700 pb-12"
         >
           <div className="flex items-center gap-2 mb-6 text-primary-400 text-sm font-medium tracking-wider uppercase">
-            <span>Blog</span>
+            <Link href="/blog" className="hover:text-primary-300 transition-colors">Blog</Link>
             <span>•</span>
             <time dateTime={blog.publishedAt?.toISOString() || blog.createdAt.toISOString()}>
               {formatDate(blog.publishedAt || blog.createdAt)}
             </time>
+            <span>•</span>
+            <span className="text-dark-400">{readingTime}</span>
           </div>
 
           <h1 className="text-4xl md:text-6xl font-black text-white mb-8 tracking-tight leading-tight">
@@ -199,11 +258,30 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
           </div>
         </motion.div>
 
+        {/* Related Posts */}
+        {relatedPosts.length > 0 && (
+          <section className="border-t border-dark-700 pt-16 mt-16">
+            <h3 className="text-2xl font-black text-white mb-8 uppercase tracking-tighter">Related Content_</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              {relatedPosts.map((post) => (
+                <Link key={post.id} href={`/blog/${post.slug}`} className="group">
+                  <div className="bg-white/5 border border-white/10 p-6 h-full hover:border-primary-500/50 transition-colors">
+                    <h4 className="text-lg font-bold text-white mb-2 group-hover:text-primary-400 transition-colors line-clamp-2">
+                      {post.title}
+                    </h4>
+                    <p className="text-dark-400 text-sm line-clamp-2">{post.excerpt}</p>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </section>
+        )}
+
         {/* Post Footer */}
         <footer className="border-t border-dark-700 pt-8 mt-12">
-          <a href="/blog" className="text-primary-400 hover:text-primary-300 text-sm">
+          <Link href="/blog" className="text-primary-400 hover:text-primary-300 text-sm">
             ← Back to all posts
-          </a>
+          </Link>
         </footer>
       </article>
       <Footer />

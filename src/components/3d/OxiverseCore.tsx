@@ -113,7 +113,7 @@ function Core() {
   const { scrollYProgress } = useScroll()
 
   const particles = useMemo(() => {
-    const count = 1200
+    const count = 800
     const positions = new Float32Array(count * 3)
     for (let i = 0; i < count; i++) {
       const r = 2 + Math.random() * 15
@@ -146,7 +146,7 @@ function Core() {
   return (
     <group>
       <Float speed={2} rotationIntensity={0.5} floatIntensity={0.5}>
-        <Sphere ref={coreRef} args={[1.5, 64, 64]}>
+        <Sphere ref={coreRef} args={[1.5, 32, 32]}>
           <MeshDistortMaterial
             ref={materialRef}
             color="#3b82f6"
@@ -171,7 +171,7 @@ function Core() {
         />
       </Points>
 
-      <Sphere ref={outerRef} args={[1.8, 32, 32]}>
+      <Sphere ref={outerRef} args={[1.8, 16, 16]}>
         <meshStandardMaterial
           color="#a855f7"
           wireframe

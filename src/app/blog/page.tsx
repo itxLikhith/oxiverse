@@ -10,6 +10,22 @@ import * as motion from 'framer-motion/client'
 
 export const revalidate = 60
 
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Blog',
+  name: 'Oxiverse Blog',
+  description: 'Latest updates, tutorials, and insights from the Oxiverse team',
+  publisher: {
+    '@type': 'Organization',
+    name: 'Oxiverse',
+    logo: {
+      '@type': 'ImageObject',
+      url: 'https://oxiverse.com/favicon-256x256.png'
+    }
+  }
+}
+
+
 export const metadata: Metadata = {
   title: 'Blog - Oxiverse',
   description: 'Latest updates, tutorials, and insights from the Oxiverse team',
@@ -33,6 +49,10 @@ export default async function BlogPage() {
 
   return (
     <main className="min-h-screen bg-transparent pt-20">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <Navigation />
       <Section id="blog">
         <motion.div

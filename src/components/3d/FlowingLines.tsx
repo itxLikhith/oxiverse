@@ -16,11 +16,11 @@ export const FlowingLines = ({ scrollProgress }: FlowingLinesProps) => {
   // Create flowing curves
   const curves = useMemo(() => {
     const curveData = []
-    const numCurves = 15
+    const numCurves = 10
 
     for (let i = 0; i < numCurves; i++) {
       const points = []
-      const numPoints = 50
+      const numPoints = 30
       const startX = (Math.random() - 0.5) * 40
       const startY = -scrollProgress * 15 + (Math.random() - 0.5) * 20
       const startZ = (Math.random() - 0.5) * 10
@@ -94,7 +94,7 @@ interface FlowingCurveProps {
 const FlowingCurve = React.forwardRef<THREE.Mesh, FlowingCurveProps>(
   ({ curve, color, width }, ref) => {
     const geometry = useMemo(() => {
-      const tubeGeometry = new THREE.TubeGeometry(curve, 100, width, 8, false)
+      const tubeGeometry = new THREE.TubeGeometry(curve, 64, width, 4, false)
       return tubeGeometry
     }, [curve, width])
 

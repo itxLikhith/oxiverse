@@ -3,16 +3,25 @@ import { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
-import { formatDate } from '@/lib/utils'
+import { formatDate, calculateReadingTime } from '@/lib/utils'
 import Navigation from '@/components/Navigation'
 import Footer from '@/components/Footer'
 import Image from 'next/image'
 import * as motion from 'framer-motion/client'
+import Link from 'next/link'
 
-export const dynamic = 'force-dynamic'
+export const revalidate = 60
 
 interface ResearchPaperPageProps {
   params: { slug: string }
+}
+
+export async function generateStaticParams() {
+  const papers = await prisma.researchPaper.findMany({
+    where: { published: true },
+    select: { slug: true },
+  })
+  return papers.map((paper) => ({ slug: paper.slug }))
 }
 
 export async function generateMetadata({ params }: ResearchPaperPageProps): Promise<Metadata> {
@@ -49,14 +58,16 @@ const MarkdownComponents = {
     }
 
     return (
-      <span className="block my-12 rounded-2xl overflow-hidden border border-white/10 shadow-2xl">
-        <img
-          {...props}
-          className="w-full h-auto object-cover max-h-[600px]"
-          loading="lazy"
+      <span className="block my-12 rounded-2xl overflow-hidden border border-white/10 shadow-2xl relative w-full aspect-video">
+        <Image
+          src={props.src}
+          alt={props.alt || ''}
+          fill
+          className="object-cover"
+          sizes="(max-width: 1200px) 100vw, 1200px"
         />
         {props.alt && (
-          <span className="block text-center text-sm text-dark-500 mt-4 italic">
+          <span className="sr-only">
             {props.alt}
           </span>
         )}
@@ -79,43 +90,89 @@ export default async function ResearchPaperPage({ params }: ResearchPaperPagePro
     notFound()
   }
 
+  // Fetch related papers
+  const relatedPapers = await prisma.researchPaper.findMany({
+    where: { 
+      published: true,
+      NOT: { slug: params.slug }
+    },
+    take: 2,
+    orderBy: { createdAt: 'desc' }
+  })
+
+  const readingTime = calculateReadingTime(paper.content || paper.abstract || '')
+  const wordCount = (paper.content || paper.abstract || '').split(/\s/g).length
+
+  const breadcrumbLd = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      {
+        '@type': 'ListItem',
+        position: 1,
+        name: 'Home',
+        item: 'https://oxiverse.com'
+      },
+      {
+        '@type': 'ListItem',
+        position: 2,
+        name: 'Research',
+        item: 'https://oxiverse.com/research'
+      },
+      {
+        '@type': 'ListItem',
+        position: 3,
+        name: paper.title,
+        item: `https://oxiverse.com/research/${params.slug}`
+      }
+    ]
+  }
+
+  const articleLd = {
+    '@context': 'https://schema.org',
+    '@type': 'ScholarlyArticle',
+    headline: paper.title,
+    description: paper.abstract,
+    image: paper.imageUrl,
+    datePublished: paper.publishedAt || paper.createdAt,
+    dateModified: paper.updatedAt || paper.publishedAt || paper.createdAt,
+    wordCount: wordCount,
+    timeRequired: `PT${Math.ceil(wordCount / 200)}M`,
+    author: {
+      '@type': 'Person',
+      name: (paper.author as any).name || (paper.author as any).email,
+      url: `https://oxiverse.com/authors/${(paper.author as any).name?.toLowerCase().replace(/\s+/g, '-') || 'admin'}`
+    },
+    publisher: {
+      '@type': 'Organization',
+      name: 'Oxiverse',
+      logo: {
+        '@type': 'ImageObject',
+        url: 'https://oxiverse.com/favicon-256x256.png'
+      },
+      url: 'https://oxiverse.com'
+    },
+    mainEntityOfPage: {
+      '@type': 'WebPage',
+      '@id': `https://oxiverse.com/research/${params.slug}`
+    },
+    keywords: 'privacy, technology research, decentralized search, algorithmic transparency'
+  }
+
   return (
     <main className="min-h-screen bg-dark-950 pt-20">
       <Navigation />
       <article className="max-w-4xl mx-auto px-4 py-12">
-        {/* Header */}
+        {/* Schema Markup */}
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
-              '@context': 'https://schema.org',
-              '@type': 'ScholarlyArticle',
-              headline: paper.title,
-              description: paper.abstract,
-              image: paper.imageUrl,
-              datePublished: paper.publishedAt || paper.createdAt,
-              dateModified: paper.updatedAt || paper.publishedAt || paper.createdAt,
-              author: {
-                '@type': 'Person',
-                name: (paper.author as any).name || (paper.author as any).email,
-                url: `https://oxiverse.com/authors/${(paper.author as any).name?.toLowerCase().replace(/\s+/g, '-') || 'admin'}`
-              },
-              publisher: {
-                '@type': 'Organization',
-                name: 'Oxiverse Research',
-                logo: {
-                  '@type': 'ImageObject',
-                  url: 'https://oxiverse.com/favicon-256x256.png'
-                }
-              },
-              mainEntityOfPage: {
-                '@type': 'WebPage',
-                '@id': `https://oxiverse.com/research/${params.slug}`
-              },
-              keywords: 'privacy, technology research, decentralized search, algorithmic transparency'
-            }),
-          }}
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }}
         />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(articleLd) }}
+        />
+
         <motion.header 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -123,11 +180,13 @@ export default async function ResearchPaperPage({ params }: ResearchPaperPagePro
           className="border-b border-dark-700 pb-12"
         >
           <div className="flex items-center gap-2 mb-6 text-accent-400 text-sm font-medium tracking-wider uppercase">
-            <span>Research</span>
+            <Link href="/research" className="hover:text-accent-300 transition-colors">Research</Link>
             <span>•</span>
             <time dateTime={paper.publishedAt?.toISOString() || paper.createdAt.toISOString()}>
               {formatDate(paper.publishedAt || paper.createdAt)}
             </time>
+            <span>•</span>
+            <span className="text-dark-400">{readingTime}</span>
           </div>
 
           <h1 className="text-4xl md:text-6xl font-black text-white mb-8 tracking-tight leading-tight">
@@ -233,11 +292,30 @@ export default async function ResearchPaperPage({ params }: ResearchPaperPagePro
           )}
         </motion.div>
 
+        {/* Related Papers */}
+        {relatedPapers.length > 0 && (
+          <section className="border-t border-dark-700 pt-16 mt-16">
+            <h3 className="text-2xl font-black text-white mb-8 uppercase tracking-tighter">Related Research_</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              {relatedPapers.map((p) => (
+                <Link key={p.id} href={`/research/${p.slug}`} className="group">
+                  <div className="bg-white/5 border border-white/10 p-6 h-full hover:border-accent-500/50 transition-colors">
+                    <h4 className="text-lg font-bold text-white mb-2 group-hover:text-accent-400 transition-colors line-clamp-2">
+                      {p.title}
+                    </h4>
+                    <p className="text-dark-400 text-sm line-clamp-2">{p.abstract}</p>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </section>
+        )}
+
         {/* Footer */}
         <footer className="border-t border-dark-700 pt-8 mt-12">
-          <a href="/research" className="text-primary-400 hover:text-primary-300 text-sm">
+          <Link href="/research" className="text-primary-400 hover:text-primary-300 text-sm">
             ← Back to all research
-          </a>
+          </Link>
         </footer>
       </article>
       <Footer />

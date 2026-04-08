@@ -54,3 +54,14 @@ export function truncate(text: string, length: number): string {
 export function cn(...inputs: ClassValue[]) {
   return inputs.filter(Boolean).join(' ')
 }
+
+/**
+ * Calculate estimated reading time for a string
+ */
+export function calculateReadingTime(content: string): string {
+  const wordsPerMinute = 200
+  const noOfWords = content.split(/\s/g).length
+  const minutes = noOfWords / wordsPerMinute
+  const readTime = Math.ceil(minutes)
+  return `${readTime} min read`
+}

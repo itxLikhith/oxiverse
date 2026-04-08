@@ -54,7 +54,7 @@ export const Experience = ({ children }: { children?: React.ReactNode }) => {
       >
         <Suspense fallback={null}>
           <AmbientLightHelper />
-          <Stars radius={100} depth={50} count={5000} factor={4} saturation={0} fade speed={1} />
+          <Stars radius={100} depth={50} count={2000} factor={4} saturation={0} fade speed={1} />
           
           <ScaledGroup scale={1.5}>
             <OxiverseCore />

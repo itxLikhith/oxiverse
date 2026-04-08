@@ -49,7 +49,13 @@ export default async function Research() {
                 <div className="retro-box p-0 h-full overflow-hidden flex flex-col md:flex-row">
                   {paper.image ? (
                     <div className="w-full md:w-48 h-48 flex-shrink-0 bg-primary-900 flex items-center justify-center overflow-hidden border-b-2 md:border-b-0 md:border-r-2 border-primary-50 p-3">
-                      <img src={paper.image} alt={paper.title} className={`w-full h-full object-${paper.imageDisplay || 'contain'} transition-transform duration-500 group-hover:scale-105`} />
+                      <Image 
+                        src={paper.image} 
+                        alt={paper.title} 
+                        width={200} 
+                        height={200} 
+                        className={`w-full h-full object-${paper.imageDisplay || 'contain'} transition-transform duration-500 group-hover:scale-105`} 
+                      />
                     </div>
                   ) : (
                     <div className="w-full md:w-48 h-48 flex-shrink-0 bg-primary-900 flex items-center justify-center border-b-2 md:border-b-0 md:border-r-2 border-primary-50">
